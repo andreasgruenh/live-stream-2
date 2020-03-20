@@ -1,0 +1,12 @@
+html {
+  background: rgb(28, 28, 70);
+  color: white;
+
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana,
+    sans-serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
