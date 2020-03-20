@@ -1,5 +1,5 @@
-import { WorldObject } from "./WorldObject";
 import { scaleLinear, ScaleLinear } from "d3";
+import { WorldObject } from "./WorldObject";
 
 export class Clock implements WorldObject {
   scaleX: ScaleLinear<number, number>;

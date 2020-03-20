@@ -1,5 +1,5 @@
-import "./index.css";
 import { GameLoop } from "./GameLoop";
+import "./index.css";
 
 const width = 500;
 const height = 500;

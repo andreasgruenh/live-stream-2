@@ -1,10 +1,9 @@
+import { PI, Point } from "./math";
 import { WorldObject } from "./WorldObject";
-import { PI } from "./math";
 
 export class WorldLocation implements WorldObject {
   constructor(
-    public x: number,
-    public y: number,
+    public location: Point,
     public label: string
   ) {}
   update(timeOfDay: number): void {}
@@ -13,12 +12,22 @@ export class WorldLocation implements WorldObject {
     day: number,
     ctx: CanvasRenderingContext2D
   ): void {
-    ctx.arc(this.x, this.y, 10, 0, PI * 2);
+    ctx.arc(
+      this.location[0],
+      this.location[1],
+      10,
+      0,
+      PI * 2
+    );
     ctx.fillStyle = "turquoise";
     ctx.fill();
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(this.label, this.x, this.y + 20);
+    ctx.fillText(
+      this.label,
+      this.location[0],
+      this.location[1] + 20
+    );
   }
 }

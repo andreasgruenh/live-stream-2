@@ -1,9 +1,8 @@
-import { WorldObject } from "./WorldObject";
 import { Clock } from "./Clock";
-import { scaleLinear } from "d3";
-import { Person } from "./Person";
 import { WorldLocation } from "./Location";
 import { floor, sample } from "./math";
+import { Person } from "./Person";
+import { WorldObject } from "./WorldObject";
 
 const speedFactor = 4;
 
@@ -21,13 +20,21 @@ export class GameLoop {
     );
 
     const superMarket = new WorldLocation(
-      400,
-      400,
+      [400, 400],
       "Netto"
     );
-    const office1 = new WorldLocation(40, 300, "Office 1");
-    const office2 = new WorldLocation(200, 200, "Office 2");
-    const office3 = new WorldLocation(400, 30, "Office 3");
+    const office1 = new WorldLocation(
+      [40, 300],
+      "Office 1"
+    );
+    const office2 = new WorldLocation(
+      [200, 200],
+      "Office 2"
+    );
+    const office3 = new WorldLocation(
+      [400, 30],
+      "Office 3"
+    );
     this.worldObjects.push(office1);
     this.worldObjects.push(office2);
     this.worldObjects.push(office3);

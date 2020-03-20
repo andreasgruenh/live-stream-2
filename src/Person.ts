@@ -1,54 +1,40 @@
-import { WorldObject } from "./WorldObject";
-import { random, PI, Point, clamp, distance } from "./math";
 import { WorldLocation } from "./Location";
-import { ScaleLinear, scaleLinear } from "d3";
+import {
+  add,
+  clamp,
+  difference,
+  distance,
+  multiply,
+  normalize,
+  PI,
+  Point,
+  random,
+  round
+} from "./math";
+import { WorldObject } from "./WorldObject";
 
 export class Person implements WorldObject {
-  homeX: number;
-  homeY: number;
-  x: number;
-  y: number;
+  home: Point;
+  currentLocation: Point;
+
+  currentTarget: Point;
 
   contactPersons: Set<Person> = new Set();
-
-  state:
-    | "going-to-work"
-    | "working"
-    | "going-home"
-    | "at-home" = "at-home";
-  scalesByState: Record<
-    Person["state"],
-    ScaleLinear<number, Point>
-  >;
+  speed: number;
 
   constructor(
     canvas: HTMLCanvasElement,
-    office: WorldLocation,
+    public office: WorldLocation,
     public allPersons: Person[],
     public remainingInfectionDays = 0
   ) {
-    this.homeX = random(0, canvas.width);
-    this.homeY = random(0, canvas.height);
-    this.x = this.homeX;
-    this.y = this.homeY;
-
-    const home: Point = [this.homeX, this.homeY];
-    const work: Point = [office.x, office.y];
-
-    this.scalesByState = {
-      "at-home": scaleLinear<number, Point>()
-        .domain([0, 24])
-        .range([home, home] as any),
-      working: scaleLinear<number, Point>()
-        .domain([0, 24])
-        .range([work, work] as any),
-      "going-home": scaleLinear<number, Point>()
-        .domain([16, 19])
-        .range([work, home] as any),
-      "going-to-work": scaleLinear<number, Point>()
-        .domain([6, 9])
-        .range([home, work] as any)
-    };
+    this.speed = random(3, 20);
+    this.home = [
+      random(0, canvas.width),
+      random(0, canvas.height)
+    ];
+    this.currentLocation = [...this.home] as Point;
+    this.currentTarget = [...this.home] as Point;
   }
 
   lastDay = 0;
@@ -61,11 +47,35 @@ export class Person implements WorldObject {
       );
       this.lastDay = day;
     }
-    const state = this.getState(timeOfDay, day);
-    const scale = this.scalesByState[state];
-    [this.x, this.y] = scale(timeOfDay);
+
+    this.updateTarget(timeOfDay, day);
+
+    const movementVector = difference(
+      this.currentTarget,
+      this.currentLocation
+    );
+    const normalized = normalize(movementVector);
+
+    const delta = multiply(normalized, this.speed);
+    this.currentLocation = add(this.currentLocation, delta);
+
+    if (
+      distance(this.currentLocation, this.currentTarget) <
+      this.speed
+    ) {
+      this.currentLocation = this.currentTarget;
+    }
 
     this.spreadMaybe();
+  }
+
+  updateTarget(timeOfDay: number, day: number) {
+    if (round(timeOfDay) === 7) {
+      this.currentTarget = this.office.location;
+    }
+    if (round(timeOfDay) === 16) {
+      this.currentTarget = this.home;
+    }
   }
 
   spreadMaybe() {
@@ -75,7 +85,10 @@ export class Person implements WorldObject {
       if (other === this) continue;
 
       if (
-        distance([this.x, this.y], [other.x, other.y]) < 20
+        distance(
+          this.currentLocation,
+          other.currentLocation
+        ) < 20
       ) {
         this.contactPersons.add(other);
       }
@@ -85,7 +98,10 @@ export class Person implements WorldObject {
       if (other.remainingInfectionDays !== 0) continue;
 
       if (
-        distance([this.x, this.y], [other.x, other.y]) > 20
+        distance(
+          this.currentLocation,
+          other.currentLocation
+        ) > 20
       ) {
         this.contactPersons.delete(other);
 
@@ -99,8 +115,8 @@ export class Person implements WorldObject {
     ctx: CanvasRenderingContext2D
   ): void {
     ctx.arc(
-      this.x + random(-2, 2),
-      this.y + random(-2, 2),
+      this.currentLocation[0] + random(-2, 2),
+      this.currentLocation[1] + random(-2, 2),
       10,
       0,
       PI * 2
@@ -108,17 +124,5 @@ export class Person implements WorldObject {
     ctx.fillStyle =
       this.remainingInfectionDays > 0 ? "purple" : "orange";
     ctx.fill();
-  }
-
-  getState(timeOfDay: number, day: number) {
-    if (timeOfDay < 6) return "at-home";
-
-    if (timeOfDay < 9) return "going-to-work";
-
-    if (timeOfDay < 16) return "working";
-
-    if (timeOfDay < 19) return "going-home";
-
-    return "at-home";
   }
 }
