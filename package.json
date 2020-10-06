@@ -6,7 +6,7 @@
   "dependencies": {
     "@types/d3": "^5.7.2",
     "d3": "^5.15.0",
-    "electron": "^8.1.1",
+    "electron": "^8.5.2",
     "parcel": "^1.12.4",
     "typescript": "^3.8.3"
   },
